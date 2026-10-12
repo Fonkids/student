@@ -1,0 +1,9 @@
+README
+
+V3
+App para realización de tests:
++ Varios tests, cada uno en una pantalla
++ Navegación entre pantallas de test
+• Corrección automática de test
+• Respuestas resaltadas después de corrección
+• Actualización de resultados obtenidos en cada ejecución
