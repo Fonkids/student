@@ -17,11 +17,98 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
  * <http://www.gnu.org/licenses/>.
+ * 
  */
+var previousPage = null;
+var currentPage = null;
 
 
 
-var tests = [//V3
+var headerHiztegia = [
+	{
+		
+		mota: "info"
+	
+	},
+	{
+		
+		mota: "ezarpenak" 
+	}
+
+]
+var pantailenHiztegia = [
+	{
+		id: 0, // P1
+		mota: "li", //log-in
+
+	},
+	{
+		id: 1, // P2
+		mota: "hm" // hasiera menua
+	},
+	{
+		id: 2, // P3
+		mota: "mp" // multiple choice
+	},
+	{
+		id: 3, //P4
+		mota: "mp" // multiple choice
+	},
+	{
+		id: 4, // P5
+		mota: "lz" // letra zopa
+	},
+	{
+		id: 5, // P6
+		mota: "mp" // multiple choice
+	},
+	{
+		id: 6, // P7
+		mota: "mp" // multiple choice
+	},
+	{
+		id: 7, // P8
+		mota: "lt" // lotu
+	},
+	{
+		id: 8, // P9
+		mota: "mp" // multiple choice
+	},
+	{
+		id: 9, // P10
+		mota: "ah" // ahorcado
+	},
+	{
+		id: 10, // P11
+		mota: "mp" // ahorcado
+	},
+	{
+		id: 11,
+		mota: "em" // emaitzak
+	}
+
+
+]
+
+var lotu = [ // Letra zoparako balio du ere momentuz
+    { element: "Lehen elementua", answer: "A" },
+    { element: "Bigarren elementua", answer: "C" },
+    { element: "Hirugarren elementua", answer: "B" }
+];
+  var ahorcado = [
+    {
+        resp: "ERANTZUNA",
+        pistak: [
+            {
+                1: "Lehen pista",
+                2: "Bigarren pista",
+                3: "Hirugarren pista"
+            }
+        ]
+    }
+];
+
+var tests = [
 	{
 		question: "This is the first question...?",
 		resp: [
@@ -87,89 +174,278 @@ var tests = [//V3
 	}
 ];
 
-var results = {//V1
+var results = {
 	corrects: 0,
 	answered: 0
 };
+var ariketak = [
+	{
+		mota: "li",
+		enuntziatua: "hemen logeatzeko formularioa kargatuko da",
+		egitura: null
 
-var pageT = {//V3
-	load: function(i) {
-//		console.log("load 1");
+	},
+	{
+		mota: "hm",
+		enuntziatua: "hemen hasiera menua kargatuko da",
+		egitura: null
 
-		$("#question-" + i).text("QUESTION " + (parseInt(i) + 1) + ": " + tests[i].question);
+	},
+	{
+		mota: "em",
+		enuntziatua: "hemen ikaslearen emaitzak erakutsiko dira",
+		egitura: null
 
-		$("label[id|='label-radio-choice-" + i + "']").each(
-			function(rI) {
-				$(this).text(tests[i].resp[rI].text);
-			}
-		);
+	},
+	{
+		mota: "ezarpenak",
+		enuntziatua: "hemen aplikazioaren ezarpenak erakutsiko dira",
+		egitura: null
 
-//		console.log("load 2");
+	},
+	
+	{
+		mota: "info",
+		enuntziatua: "hemen erabiltzailearen profilearen informazioa erakutsiko da",
+		egitura: null
+
+	},
+	{
+		mota: "mp",
+		enuntziatua: "Galderak multiple choice formatukoak izango dira, multimedia edukia dutelarik",
+		egitura: tests
+	
+	},
+	{
+		mota: "lt",
+		enuntziatua: "Lotu motako ariketa izango da, multimedia edukiak elkarrekin erlazionatuz",
+		egitura: lotu
+	},
+	{
+		mota: "lz",
+		enuntziatua: "Letra zopa motako ariketa",
+		egitura: lotu
+	},
+	{
+		mota: "ah",
+		enuntziatua: "Ahorcado motako ariketa, pistekin",
+		egitura: ahorcado
 	}
+
+]
+
+
+
+function createFooter(i) {
+    var prev = i - 1;
+    var next = i + 1;
+	next != pantailenHiztegia.length ? next : next = 1 // hasiera menura bueltatzeko, ez log menura
+
+    return $('<div data-role="footer" data-position="fixed" style="padding: 5px 10px;"> <div style="display: flex; justify-content: space-between; align-items: center;">' +
+        (prev >= 0
+            ? '<a  href="#page-t-' + pantailenHiztegia[prev].mota + '-' + prev + '" id="prev-' + i + '" class="ui-btn ui-icon-arrow-l ui-btn-icon-left ui-mini ui-btn-inline ui-corner-all" data-transition="fade">Aurrekoa</a>'
+            : ''
+        ) +
+		
+        '<a  href="#page-t-' + pantailenHiztegia[next].mota + '-' + next + '" id="next-' + i + '" class="ui-btn ui-icon-arrow-r ui-btn-icon-right ui-mini ui-btn-inline ui-corner-all" data-transition="fade">Hurrengoa</a>' +
+        '</div>'+
+		'<h4 style="text-align: center; margin: 5px 0 0;">2026-2027</h4>' +
+        '</div>');
 }
 
 
-var pageT = {
-	create: function(i) {
-	
-		var pageDiv = $('<div data-role="page" id="page-t-' + i + '"></div>');
-		var headerDiv ='<div data-role="header" data-position="fixed" role="banner" class="ui-header ui-bar-inherit ui-header-fixed slidedown">';
+function createContent(i) {
+    const pantaila = pantailenHiztegia[i];
 
-		var contentDiv =
-			`<h1 style="margin-left: 0; margin-right: 0; white-space: nowrap; overflow: visible;">FonkidsStudent: P1</h1><p> Hemen logeatzeko/erregistratzeko edukia egongo da. Saioa hasterakoan hurrengo pantailara (P2) joko da</p>
-			<a href="#page-t-1" id="next-0" class="ui-btn ui-icon-arrow-r ui-btn-icon-right ui-mini ui-btn-inline ui-corner-all" data-transition="fade">Saioa hasi</a>`;
+    const arikMota = ariketak.find(
+        a => a.mota === pantaila.mota
+    );
+
+    const contentDiv = $('<div data-role="content"></div>');
+
+    contentDiv.append(
+        $('<h2></h2>').text(`P${i + 1}: ${arikMota.enuntziatua}`)
+    );
+
+    switch (pantaila.mota) {
+        case "mp": // Multiple choice
+            arikMota.egitura.forEach((question, qIndex) => {
+                const questionDiv = $("<div></div>");
+
+                questionDiv.append(
+                    $("<h3></h3>").text(question.question)
+                );
+
+                question.resp.forEach((answer, aIndex) => {
+                    const id = `q${i}-${qIndex}-${aIndex}`;
+
+                    questionDiv.append(
+                        $("<input>", {
+                            type: "radio",
+                            name: `question-${i}-${qIndex}`,
+                            id: id,
+                            value: aIndex
+                        }),
+                        $("<label>", {
+                            for: id,
+                            text: answer.text
+                        })
+                    );
+                });
+
+                contentDiv.append(questionDiv);
+            });
+            break;
+
+        case "lt": // Lotu
+            arikMota.egitura.forEach((item, index) => {
+                contentDiv.append(
+                    $("<p></p>").text(
+                        `${item.element} → ${item.answer}`
+                    )
+                );
+            });
+            break;
+
+        case "lz": // Letra zopa
+       
+			arikMota.egitura.forEach((item, index) => {
+				contentDiv.append(
+					$("<p></p>").text(
+						`${item.element} → ${item.answer}`
+					)
+				);
+				$("<p></p>").text("Letra zopa hemen agertuko da.")
+			});
+            
+            break;
+
+        case "ah": // Ahorcado
+            arikMota.egitura.forEach(item => {
+                contentDiv.append(
+                    $("<p></p>").text(item.pistak[0][1])
+                );
+            });
+            break;
+
+        default:
+            contentDiv.append(
+                $("<p></p>").text("Edukirik ez dago.")
+            );
+    }
+
+    return contentDiv;
+}
+function createBackButton() {
+    return $('<a href="#" class="ui-btn ui-icon-arrow-l ui-btn-icon-left ui-mini ui-corner-all">Atzera</a>')
+        .on("click", function (event) {
+            event.preventDefault();
+
+            if (previousPage && $(previousPage).length) {
+                $.mobile.changePage(previousPage, {
+                    transition: "fade"
+                });
+            } else {
+                console.log("No previous page found:", previousPage);
+            }
+        });
+}
+
+function createHeader(i) {
+    var header = $('<div data-role="header" data-position="fixed">' +
+        '<table style="width:100%; table-layout:fixed;"><tbody><tr>' +
+        '<td style="text-align:left; width:33%;"></td>' +
+        '<td style="text-align:center; width:34%;">Logo</td>' +
+        '<td style="text-align:right; width:33%;"></td>' +
+        '</tr></tbody></table></div>');
+
+    header.find("td").first().append(
+        $('<a href="#page-t-info" class="ui-btn ui-mini ui-corner-all">Info</a>')
+            .on("click", saveCurrentPage)
+    );
+
+    header.find("td").last().append(
+        $('<a href="#page-t-ezarpenak" class="ui-btn ui-mini ui-corner-all">Ezarpenak</a>')
+            .on("click", saveCurrentPage)
+    );
+
+    return header;
+}
+function saveCurrentPage() {
+    var activePage = $.mobile.activePage;
+
+    if (activePage) {
+        previousPage = "#" + activePage.attr("id");
+    }
+}
+var pageHeader = {
+    create: function(i) {
+        var pageDiv = $('<div data-role="page" id="page-t-' +
+            headerHiztegia[i].mota + '"></div>');
+
+        var headerDiv = $('<div data-role="header">' +
+            '<h1>' + headerHiztegia[i].mota + '</h1>' +
+            '</div>');
+
+        var contentDiv = $('<div data-role="content"></div>');
+
+        if (headerHiztegia[i].mota === "info") {
+            contentDiv.append(
+                $('<p></p>').text("Erabiltzailearen profilearen informazioa")
+            );
+        } else if (headerHiztegia[i].mota === "ezarpenak") {
+            contentDiv.append(
+                $('<p></p>').text("Aplikazioaren ezarpenak")
+            );
+        }
+
+        contentDiv.prepend(createBackButton());
+
+        pageDiv.append(headerDiv, contentDiv);
+
+        return pageDiv;
+    }
+};
+var pageOrokorra = {
+	create: function(i) {
+		
+		var pageDiv = $('<div data-role="page" id="page-t-'+pantailenHiztegia[i].mota+'-' + i + '"></div>');
+		var headerDiv = createHeader(i);
+		var contentDiv = createContent(i);
+		var footerDiv = createFooter(i)
 
 		pageDiv.append(headerDiv, contentDiv, footerDiv);
-
-		$(document).on(
-			"pageshow", "#page-t-" + i,
-			function() {
-				fitVisibleAll();
-			}
-		);
-
-		//		console.log("create 2");
 		return pageDiv;
+
 	},
-	load: function(i) {
-		//		console.log("load 1");
-
-		$("#question-" + i).text("QUESTION " + (parseInt(i) + 1) + ": " + tests[i].question);
-
-		$("label[id|='label-radio-choice-" + i + "']").each(
-			function(rI) {
-				$(this).text(tests[i].resp[rI].text);
-			}
-		);
-
-		$("#prev-" + i).attr("href", "#page-t-" + (parseInt(i) - 1));
-		$("#next-" + i).attr("href", "#page-t-" + (parseInt(i) + 1));
-		//		console.log("load 2");
-	}
+	
+	
 };
 
-var appSession = {//V4
+var appSession = {
 	initTimestamp: null,
 	locale: "en-EN",
 	loadSessionPages: function() {
-		//		console.log("loadSessionPages 1");  
-		var pageDiv;
-		for (let i in tests) {
-			pageDiv = pageT.create(i);
-			$("body").append(pageDiv);
-			pageT.load(i);
+		if (pantailenHiztegia.length === 0) {
+			return;
 		}
 
-		$("#prev-0").attr("href", "#page-t-" + (tests.length - 1));
-		$("#next-" + (tests.length - 1)).attr("href", "#page-t-0");
+		for (let i = 0; i < pantailenHiztegia.length; i++) {
+		
 
-		$(".alias").text("ALIAS: " + user.alias);
-		$(".initTimestamp").text("DATE: " + dateUtils.localeFormat(appSession.initTimestamp, appSession.locale));
+			var pageDiv = pageOrokorra.create(i);
+			$("body").append(pageDiv);
+			pageDiv.page();
+			
+		}
 
-		$("#loginDiv").hide();
-		$("#continue").show();
-		$("#next-frontPage").show();
+		for (let i = 0; i < headerHiztegia.length; i++){
+			var pageDiv = pageHeader.create(i);
+			$("body").append(pageDiv);
+			pageDiv.page();
 
-		//		console.log("loadSessionPages 2");
+		}
+
+		$.mobile.changePage("#page-t-"+pantailenHiztegia[0].mota+"-0");
 	}
 };
