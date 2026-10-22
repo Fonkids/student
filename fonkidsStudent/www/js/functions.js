@@ -20,35 +20,55 @@
  */
 
 
-function check(i) {//V1
-	//	console.log("check 1");
+function check(i) {
+	if (!tests[i] || Object.prototype.hasOwnProperty.call(results.answers, i)) {
+		return;
+	}
 
+	var activePage = $.mobile.activePage;
+	var selectedInput = activePage.find("input[data-question-index='" + i + "']:checked");
+	var feedback = activePage.find(".answer-feedback[data-question-index='" + i + "']");
+
+	if (!selectedInput.length) {
+		feedback.text("Please select an answer first.");
+		return;
+	}
+
+	var selectedAnswer = Number(selectedInput.val());
+	if (!Number.isInteger(selectedAnswer) || !tests[i].resp[selectedAnswer]) {
+		feedback.text("The selected answer is invalid.");
+		return;
+	}
+
+	var isCorrect = tests[i].resp[selectedAnswer].isCorrect;
+	results.answers[i] = isCorrect;
 	results.answered++;
 
-	var answer = $("input[name='radio-choice-" + i + "']:checked").val();
-
-	if (tests[i].resp[answer].isCorrect) {
-		alert("CORRECT");
+	if (isCorrect) {
 		results.corrects++;
+		feedback.text("Oso ondo!");
 	}
 	else {
-		alert("WRONG");
-		$("#button-" + i + "-2").css("display", "block");
+		feedback.text("Oso txarto :(");
 	}
 
-	$(".res-1").text("" + results.corrects + "/" + results.answered);
-	$(".res-2").text("" + (results.corrects * 100 / results.answered).toFixed(2) + "%");
+	$("input[data-question-index='" + i + "']").each(function() {
+		var answerIndex = Number($(this).val());
+		var label = $("label[for='" + this.id + "']");
 
-	$("label[id|='label-radio-choice-" + i + "']").each( //V2
-		function(rI) {
-			if (!tests[i].resp[rI].isCorrect)
-				$(this).css("color", "darkred");
-			else
-				$(this).css({ "color": "white", "background-color": "rgb(100, 150, 100)", "font-size": "24px" });
+		if (tests[i].resp[answerIndex].isCorrect) {
+			label.css({ "color": "white", "background-color": "rgb(100, 150, 100)" });
 		}
-	);
+		else if (answerIndex === selectedAnswer) {
+			label.css({ "color": "white", "background-color": "darkred" });
+		}
 
-	$("#button-" + i + "-1").addClass("ui-disabled"); //V2
+		$(this).checkboxradio("disable");
+	});
 
-	//	console.log("check 2");
+	$(".answer-feedback[data-question-index='" + i + "']")
+		.text(isCorrect ? "Oso ondo!" : "Oso txarto :(");
+	$(".res-1").text(results.corrects + "/" + results.answered);
+	$(".res-2").text((results.corrects * 100 / results.answered).toFixed(2) + "%");
+	$(".check-answer[data-question-index='" + i + "']").button("disable");
 }

@@ -176,7 +176,8 @@ var tests = [
 
 var results = {
 	corrects: 0,
-	answered: 0
+	answered: 0,
+	answers: {}
 };
 var ariketak = [
 	{
@@ -271,6 +272,7 @@ function createContent(i) {
         case "mp": // Multiple choice
             arikMota.egitura.forEach((question, qIndex) => {
                 const questionDiv = $("<div></div>");
+                const answerGroup = $('<fieldset data-role="controlgroup"></fieldset>');
 
                 questionDiv.append(
                     $("<h3></h3>").text(question.question)
@@ -279,12 +281,13 @@ function createContent(i) {
                 question.resp.forEach((answer, aIndex) => {
                     const id = `q${i}-${qIndex}-${aIndex}`;
 
-                    questionDiv.append(
+                    answerGroup.append(
                         $("<input>", {
                             type: "radio",
                             name: `question-${i}-${qIndex}`,
                             id: id,
-                            value: aIndex
+                            value: aIndex,
+                            "data-question-index": qIndex
                         }),
                         $("<label>", {
                             for: id,
@@ -293,8 +296,33 @@ function createContent(i) {
                     );
                 });
 
+                questionDiv.append(
+                    answerGroup,
+                    $("<button>", {
+                        type: "button",
+                        text: "Check answer",
+                        "data-question-index": qIndex
+                    })
+                        .addClass("check-answer")
+                        .on("click", function() {
+                            check(qIndex);
+                        }),
+                    $("<p>", {
+                        
+                        "data-question-index": qIndex
+                    }).addClass("answer-feedback")
+                );
+
                 contentDiv.append(questionDiv);
             });
+            contentDiv.append(
+                $("<p></p>").append(
+                    $("<span></span>").addClass("res-1").text("0/0"),
+                    " correct answers; ",
+                    $("<span></span>").addClass("res-2").text("0.00%"),
+                    " correct"
+                )
+            );
             break;
 
         case "lt": // Lotu
