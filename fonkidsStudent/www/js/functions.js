@@ -21,6 +21,7 @@
 
 
 function check(i) {
+	
 	if (!tests[i] || Object.prototype.hasOwnProperty.call(results.answers, i)) {
 		return;
 	}

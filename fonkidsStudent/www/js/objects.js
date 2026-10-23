@@ -270,24 +270,24 @@ function createContent(i) {
 
     switch (pantaila.mota) {
         case "mp": // Multiple choice
-            arikMota.egitura.forEach((question, qIndex) => {
+            q = arikMota.egitura[0].question;
                 const questionDiv = $("<div></div>");
                 const answerGroup = $('<fieldset data-role="controlgroup"></fieldset>');
 
                 questionDiv.append(
-                    $("<h3></h3>").text(question.question)
+                    $("<h3></h3>").text(q)
                 );
 
-                question.resp.forEach((answer, aIndex) => {
-                    const id = `q${i}-${qIndex}-${aIndex}`;
+                arikMota.egitura[0].resp.forEach((answer, aIndex) => {
+                    const id = `q${i}-${i}-${aIndex}`;
 
                     answerGroup.append(
                         $("<input>", {
                             type: "radio",
-                            name: `question-${i}-${qIndex}`,
+                            name: `question-${i}-${i}`,
                             id: id,
                             value: aIndex,
-                            "data-question-index": qIndex
+                            "data-question-index": i
                         }),
                         $("<label>", {
                             for: id,
@@ -301,20 +301,20 @@ function createContent(i) {
                     $("<button>", {
                         type: "button",
                         text: "Check answer",
-                        "data-question-index": qIndex
+                        "data-question-index": i
                     })
                         .addClass("check-answer")
                         .on("click", function() {
-                            check(qIndex);
+                            check(0);
                         }),
                     $("<p>", {
                         
-                        "data-question-index": qIndex
+                        "data-question-index": i
                     }).addClass("answer-feedback")
                 );
 
                 contentDiv.append(questionDiv);
-            });
+            
             contentDiv.append(
                 $("<p></p>").append(
                     $("<span></span>").addClass("res-1").text("0/0"),
